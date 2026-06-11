@@ -30,7 +30,7 @@ freely, subject to the following restrictions:
 
 const char * getBackendEnumString(int aBackend)
 {
-	SOLOUD_ASSERT(SoLoud::Soloud::BACKEND_MAX == 17); // if this fails, this function needs adjustment
+	SOLOUD_ASSERT(SoLoud::Soloud::BACKEND_MAX == 18); // if this fails, this function needs adjustment
 	switch (aBackend)
 	{
 	case SoLoud::Soloud::AUTO: return "AUTO";
