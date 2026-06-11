@@ -216,6 +216,15 @@ if (SOLOUD_BACKEND_OPENSLES)
 	)
 endif()
 
+if (SOLOUD_BACKEND_CTRU_NDSP)
+	add_definitions (-DWITH_CTRU_NDSP)
+
+	set (BACKENDS_SOURCES
+		${BACKENDS_SOURCES}
+		${BACKENDS_PATH}/ctru_ndsp/soloud_ctru_ndsp.cpp
+	)
+endif()
+
 
 if (SOLOUD_BACKEND_XAUDIO2)
 	add_definitions (-DWITH_XAUDIO2)

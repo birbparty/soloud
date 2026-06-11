@@ -52,10 +52,11 @@ enum SOLOUD_ENUMS
 	SOLOUD_COREAUDIO = 11,
 	SOLOUD_OPENSLES = 12,
 	SOLOUD_VITA_HOMEBREW = 13,
-	SOLOUD_MINIAUDIO = 14,
-	SOLOUD_NOSOUND = 15,
-	SOLOUD_NULLDRIVER = 16,
-	SOLOUD_BACKEND_MAX = 17,
+	SOLOUD_CTRU_NDSP = 14,
+	SOLOUD_MINIAUDIO = 15,
+	SOLOUD_NOSOUND = 16,
+	SOLOUD_NULLDRIVER = 17,
+	SOLOUD_BACKEND_MAX = 18,
 	SOLOUD_CLIP_ROUNDOFF = 1,
 	SOLOUD_ENABLE_VISUALIZATION = 2,
 	SOLOUD_LEFT_HANDED_3D = 4,
@@ -169,6 +170,8 @@ void Soloud_destroy(Soloud * aSoloud);
 Soloud * Soloud_create();
 int Soloud_init(Soloud * aSoloud);
 int Soloud_initEx(Soloud * aSoloud, unsigned int aFlags /* = Soloud::CLIP_ROUNDOFF */, unsigned int aBackend /* = Soloud::AUTO */, unsigned int aSamplerate /* = Soloud::AUTO */, unsigned int aBufferSize /* = Soloud::AUTO */, unsigned int aChannels /* = 2 */);
+int Soloud_pause(Soloud * aSoloud);
+int Soloud_resume(Soloud * aSoloud);
 void Soloud_deinit(Soloud * aSoloud);
 unsigned int Soloud_getVersion(Soloud * aSoloud);
 const char * Soloud_getErrorString(Soloud * aSoloud, int aErrorCode);

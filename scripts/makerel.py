@@ -301,6 +301,7 @@ sources = [
 "src/audiosource/wav/stb_vorbis.h",
 "src/backend/alsa/soloud_alsa.cpp",
 "src/backend/coreaudio/soloud_coreaudio.cpp",
+"src/backend/ctru_ndsp/soloud_ctru_ndsp.cpp",
 "src/backend/null/soloud_null.cpp",
 "src/backend/openal/soloud_openal.cpp",
 "src/backend/openal/soloud_openal_dll.c",

@@ -29,6 +29,9 @@ print_option_status (SOLOUD_BACKEND_COREAUDIO "CoreAudio backend")
 option (SOLOUD_BACKEND_OPENSLES "Set to ON for building OpenSLES backend" OFF)
 print_option_status (SOLOUD_BACKEND_OPENSLES "OpenSLES backend")
 
+option (SOLOUD_BACKEND_CTRU_NDSP "Set to ON for building Nintendo 3DS NDSP backend" OFF)
+print_option_status (SOLOUD_BACKEND_CTRU_NDSP "Nintendo 3DS NDSP backend")
+
 option (SOLOUD_BACKEND_XAUDIO2 "Set to ON for building XAudio2 backend" OFF)
 print_option_status (SOLOUD_BACKEND_XAUDIO2 "XAudio2 backend")
 

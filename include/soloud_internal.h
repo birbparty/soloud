@@ -68,6 +68,9 @@ namespace SoLoud
 	// PS Vita homebrew back-end initialization call	
 	result vita_homebrew_init(SoLoud::Soloud *aSoloud, unsigned int aFlags = Soloud::CLIP_ROUNDOFF, unsigned int aSamplerate = 44100, unsigned int aBuffer = 2048, unsigned int aChannels = 2);
 
+	// Nintendo 3DS NDSP back-end initialization call
+	result ctru_ndsp_init(SoLoud::Soloud *aSoloud, unsigned int aFlags = Soloud::CLIP_ROUNDOFF, unsigned int aSamplerate = 44100, unsigned int aBuffer = 5292, unsigned int aChannels = 2);
+
 	// ALSA back-end initialization call
 	result alsa_init(SoLoud::Soloud *aSoloud, unsigned int aFlags = Soloud::CLIP_ROUNDOFF, unsigned int aSamplerate = 44100, unsigned int aBuffer = 2048, unsigned int aChannels = 2);
 

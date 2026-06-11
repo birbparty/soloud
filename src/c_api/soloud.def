@@ -3,6 +3,8 @@ EXPORTS
 	Soloud_create
 	Soloud_init
 	Soloud_initEx
+	Soloud_pause
+	Soloud_resume
 	Soloud_deinit
 	Soloud_getVersion
 	Soloud_getErrorString
