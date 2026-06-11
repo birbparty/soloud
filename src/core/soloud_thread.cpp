@@ -24,6 +24,11 @@ freely, subject to the following restrictions:
 
 #if defined(_WIN32)||defined(_WIN64)
 #include <windows.h>
+#elif defined(__3DS__)
+#include <3ds/os.h>
+#include <3ds/svc.h>
+#include <3ds/synchronization.h>
+#include <3ds/thread.h>
 #else
 #include <inttypes.h>
 #include <pthread.h>
@@ -124,6 +129,106 @@ namespace SoLoud
 		int getTimeMillis()
 		{
 			return GetTickCount();
+		}
+
+#elif defined(__3DS__)
+        struct ThreadHandleData
+        {
+            ::Thread thread;
+        };
+
+		void * createMutex()
+		{
+			LightLock *mutex = new LightLock;
+			LightLock_Init(mutex);
+			return (void*)mutex;
+		}
+
+		void destroyMutex(void *aHandle)
+		{
+			LightLock *mutex = (LightLock*)aHandle;
+			if (mutex)
+			{
+				delete mutex;
+			}
+		}
+
+		void lockMutex(void *aHandle)
+		{
+			LightLock *mutex = (LightLock*)aHandle;
+			if (mutex)
+			{
+				LightLock_Lock(mutex);
+			}
+		}
+
+		void unlockMutex(void *aHandle)
+		{
+			LightLock *mutex = (LightLock*)aHandle;
+			if (mutex)
+			{
+				LightLock_Unlock(mutex);
+			}
+		}
+
+		struct soloud_thread_data
+		{
+			threadFunction mFunc;
+			void *mParam;
+		};
+
+		static void threadfunc(void *d)
+		{
+			soloud_thread_data *p = (soloud_thread_data *)d;
+			p->mFunc(p->mParam);
+			delete p;
+		}
+
+        ThreadHandle createThread(threadFunction aThreadFunction, void *aParameter)
+		{
+			soloud_thread_data *d = new soloud_thread_data;
+			d->mFunc = aThreadFunction;
+			d->mParam = aParameter;
+
+			ThreadHandleData *threadHandle = new ThreadHandleData;
+			threadHandle->thread = threadCreate(threadfunc, d, 32 * 1024, 0x30, -2, false);
+			if (0 == threadHandle->thread)
+			{
+				delete d;
+				delete threadHandle;
+				return 0;
+			}
+			return threadHandle;
+		}
+
+		void sleep(int aMSec)
+		{
+			svcSleepThread((s64)aMSec * 1000000LL);
+		}
+
+        void wait(ThreadHandle aThreadHandle)
+        {
+			if (aThreadHandle && aThreadHandle->thread)
+			{
+				threadJoin(aThreadHandle->thread, U64_MAX);
+			}
+        }
+
+        void release(ThreadHandle aThreadHandle)
+        {
+			if (aThreadHandle)
+			{
+				if (aThreadHandle->thread)
+				{
+					threadFree(aThreadHandle->thread);
+				}
+				delete aThreadHandle;
+			}
+        }
+
+		int getTimeMillis()
+		{
+			return (int)osGetTime();
 		}
 
 #else // pthreads
