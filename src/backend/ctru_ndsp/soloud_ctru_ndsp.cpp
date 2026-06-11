@@ -25,7 +25,7 @@ freely, subject to the following restrictions:
 #include "soloud.h"
 #include "soloud_thread.h"
 
-#if !defined(WITH_CTRU_NDSP)
+#if !defined(WITH_CTRU_NDSP) || !defined(__3DS__)
 
 namespace SoLoud
 {
@@ -38,6 +38,8 @@ namespace SoLoud
 #else
 
 #include <3ds.h>
+#include <atomic>
+#include <new>
 #include <stdint.h>
 #include <string.h>
 
@@ -47,12 +49,23 @@ namespace SoLoud
 	static const int CTRU_NDSP_WAVEBUFFERS = 3;
 	struct CtruNdspData
 	{
+		CtruNdspData()
+			: mSoloud(0)
+			, mThreadHandle(0)
+			, mSamples(0)
+			, mRunning(false)
+			, mSamplerate(0)
+			, mSamplesPerBuffer(0)
+			, mChannels(0)
+		{
+		}
+
 		Soloud *mSoloud;
 		Thread::ThreadHandle mThreadHandle;
 		ndspWaveBuf mWaveBuf[CTRU_NDSP_WAVEBUFFERS];
 		int16_t *mSamples;
 		LightEvent mRefillEvent;
-		volatile bool mRunning;
+		std::atomic<bool> mRunning;
 		unsigned int mSamplerate;
 		unsigned int mSamplesPerBuffer;
 		unsigned int mChannels;
@@ -61,7 +74,7 @@ namespace SoLoud
 	static void ctru_ndsp_callback(void *aParam)
 	{
 		CtruNdspData *data = static_cast<CtruNdspData*>(aParam);
-		if (data && data->mRunning)
+		if (data && data->mRunning.load(std::memory_order_acquire))
 		{
 			LightEvent_Signal(&data->mRefillEvent);
 		}
@@ -80,12 +93,12 @@ namespace SoLoud
 	{
 		CtruNdspData *data = static_cast<CtruNdspData*>(aParam);
 
-		while (data->mRunning)
+		while (data->mRunning.load(std::memory_order_acquire))
 		{
 			bool queued = false;
 			for (int i = 0; i < CTRU_NDSP_WAVEBUFFERS; i++)
 			{
-				if (!data->mRunning)
+				if (!data->mRunning.load(std::memory_order_acquire))
 				{
 					break;
 				}
@@ -96,7 +109,7 @@ namespace SoLoud
 					queued = true;
 				}
 			}
-			if (!queued && data->mRunning)
+			if (!queued && data->mRunning.load(std::memory_order_acquire))
 			{
 				LightEvent_Wait(&data->mRefillEvent);
 			}
@@ -111,7 +124,8 @@ namespace SoLoud
 		}
 
 		CtruNdspData *data = static_cast<CtruNdspData*>(aSoloud->mBackendData);
-		data->mRunning = false;
+		ndspSetCallback(0, 0);
+		data->mRunning.store(false, std::memory_order_release);
 		LightEvent_Signal(&data->mRefillEvent);
 		if (data->mThreadHandle)
 		{
@@ -119,7 +133,6 @@ namespace SoLoud
 			Thread::release(data->mThreadHandle);
 		}
 
-		ndspSetCallback(0, 0);
 		ndspChnWaveBufClear(CTRU_NDSP_CHANNEL);
 		ndspChnReset(CTRU_NDSP_CHANNEL);
 		ndspExit();
@@ -145,10 +158,15 @@ namespace SoLoud
 			return UNKNOWN_ERROR;
 		}
 
-		CtruNdspData *data = new CtruNdspData;
-		memset(data, 0, sizeof(*data));
+		CtruNdspData *data = new (std::nothrow) CtruNdspData;
+		if (!data)
+		{
+			ndspExit();
+			return OUT_OF_MEMORY;
+		}
+
 		data->mSoloud = aSoloud;
-		data->mRunning = true;
+		data->mRunning.store(true, std::memory_order_release);
 		data->mSamplerate = aSamplerate;
 		data->mSamplesPerBuffer = aBuffer;
 		data->mChannels = aChannels;
